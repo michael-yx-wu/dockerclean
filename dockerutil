@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+dockerutil_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+function displayUsage {
+    local usage='Usage: dockerutil COMMAND [arg...]'
+    echo "$usage"
+}
+
+function displayCommandSummaries {
+    echo 'Commands:'
+    local filename=''
+    local summary=''
+    for file in $dockerutil_dir/commands/*; do
+        filename=$(echo "$file" | sed "s/.*\///")
+        summary="$(grep -o "summary=\'.*\'" "$file" | sed "s/^[^\']*\'\([^\']*\)\'.*/\1/")"
+        printf '%4s'
+        printf "%-10s%s\n" "$filename" "$summary"
+    done
+}
+
+function displayHelp() {
+    echo 'Run dockerutil COMMAND -h for more information on a command'
+}
+
+function displayUsageCommandsAndHelp {
+    displayUsage
+    echo ''
+    displayCommandSummaries
+    echo ''
+    displayHelp
+}
+
+function isValidCommand {
+    local filename=''
+    for file in $dockerutil_dir/commands/*; do
+        filename=$(echo "$file" | sed "s/.*\///")
+        if [ "$1" == "$filename" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+if [ "$#" -eq 0 ]; then
+    displayUsageCommandsAndHelp
+elif ! isValidCommand "$1"; then
+    displayUsageCommandsAndHelp
+else
+    cmd="$1"
+    shift
+    . "$dockerutil_dir/commands/$cmd" "$@"
+fi
