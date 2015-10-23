@@ -42,6 +42,22 @@ function displayHelpPrompt {
     echo 'See dockerutil clean -h for more information'
 }
 
+function gatherDanglingImagesToRemove {
+    if ! "$dangling"; then
+        echo ''
+        return 0
+    fi
+    docker images -a | grep none
+}
+
+function removeDanglingImages {
+    if [ -z "$1" ]; then
+        echo 'No dangling images to remove'
+        return 0
+    fi
+    docker rmi -f $(docker images -a | grep none | awk '{print $3}')
+}
+
 function gatherImagesToRemove {
     if ! "$grepTagName"; then
         echo ''
@@ -123,17 +139,22 @@ if ! { "$dangling" || "$grepContainerName" || "$grepTagName"; } then
     displayHelpPrompt
 else
     images=$(gatherImagesToRemove)
+    danglingImages=$(gatherDanglingImagesToRemove)
     containers=$(gatherContainersToRemove)
     if "$dryRun"; then
         printf 'Rerun with the -r option to remove the following:\n'
         if [ ! -z "$images" ]; then
             printf "\nImages:\n%s\n" "$images"
         fi
+        if [ ! -z "$dangling" ]; then
+            printf "\nDangling Images:\n%s\n" "$danglingImages"
+        fi
         if [ ! -z "$containers" ]; then
             printf "\nContainers:\n%s\n" "$containers"
         fi
     else
         removeImages "$images"
+        removeDanglingImages "$danglingImages"
         removeContainers "$containers"
     fi
 fi
