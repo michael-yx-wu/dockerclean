@@ -47,15 +47,19 @@ function gatherDanglingImagesToRemove {
         echo ''
         return 0
     fi
-    docker images -a | grep none
+    docker images | grep none
 }
 
 function removeDanglingImages {
+    if ! "$dangling"; then
+        echo ''
+        return 0
+    fi
     if [ -z "$1" ]; then
         echo 'No dangling images to remove'
         return 0
     fi
-    docker rmi -f $(docker images -a | grep none | awk '{print $3}')
+    docker rmi -f $(docker images | grep none | awk '{print $3}')
 }
 
 function gatherImagesToRemove {
@@ -63,7 +67,7 @@ function gatherImagesToRemove {
         echo ''
         return 0
     fi
-    docker images -a | grep "$grepTagNamePattern"
+    docker images | grep "$grepTagNamePattern"
 }
 
 function removeImages {
@@ -75,7 +79,7 @@ function removeImages {
         echo 'No matching images to remove'
         return 0
     fi
-    docker rmi -f $(docker images -a | grep $grepTagNamePattern | awk '{print $3}')
+    docker rmi -f $(docker images | grep $grepTagNamePattern | awk '{print $3}')
 }
 
 function gatherContainersToRemove {
@@ -142,11 +146,15 @@ else
     danglingImages=$(gatherDanglingImagesToRemove)
     containers=$(gatherContainersToRemove)
     if "$dryRun"; then
-        printf 'Rerun with the -r option to remove the following:\n'
+        if [ -z "$images" ] && [ -z "$danglingImages" ] && [ -z "$containers" ]; then
+            printf 'Nothing to remove\n'
+        else
+            printf 'Rerun with the -r option to remove the following:\n'
+        fi
         if [ ! -z "$images" ]; then
             printf "\nImages:\n%s\n" "$images"
         fi
-        if [ ! -z "$dangling" ]; then
+        if [ ! -z "$danglingImages" ]; then
             printf "\nDangling Images:\n%s\n" "$danglingImages"
         fi
         if [ ! -z "$containers" ]; then
