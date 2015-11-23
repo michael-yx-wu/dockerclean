@@ -39,7 +39,7 @@ function displayHelp {
 }
 
 function displayHelpPrompt {
-    echo 'See dockerutil clean -h for more information'
+    echo "See 'dockerutil clean -h' for more information"
 }
 
 function gatherDanglingImagesToRemove {
