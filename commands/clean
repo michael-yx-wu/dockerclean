@@ -6,10 +6,10 @@ usage="Usage: dockerutil clean [OPTIONS]"
 # global variables
 dryRun=true
 dangling=false
-grepContainerName=false
-grepContainerNamePattern=''
-grepTagName=false
-grepTagNamePattern=''
+grepContainer=false
+grepContainerPattern=''
+grepImage=false
+grepImagePattern=''
 
 function displayUsageAndSummary {
     printf "%s\n\n%s\n" "$usage" "$summary"
@@ -21,13 +21,13 @@ function displayHelp {
     declare -A optionsTable
     local numFlags=5
     optionsTable["0,0"]='-c PATTERN'
-    optionsTable["0,1"]='Remove all containers whose names matches PATTERN'
+    optionsTable["0,1"]='Remove all containers matched by PATTERN'
     optionsTable["1,0"]='-d'
     optionsTable["1,1"]='Remove all images tagged as <none>'
     optionsTable["2,0"]='-r'
     optionsTable["2,1"]='If the -r option is not given, display all images or containers that would be removed'
     optionsTable["3,0"]='-t PATTERN'
-    optionsTable["3,1"]='Remove all images whose tags matches PATTERN'
+    optionsTable["3,1"]='Remove all images matched by PATTERN'
     optionsTable["4,0"]='-h'
     optionsTable["4,1"]='Print usage and options'
     i=0
@@ -63,15 +63,15 @@ function removeDanglingImages {
 }
 
 function gatherImagesToRemove {
-    if ! "$grepTagName"; then
+    if ! "$grepImage"; then
         echo ''
         return 0
     fi
-    docker images | grep "$grepTagNamePattern"
+    docker images | grep "$grepImagePattern"
 }
 
 function removeImages {
-    if ! "$grepTagName"; then
+    if ! "$grepImage"; then
         echo ''
         return 0
     fi
@@ -79,19 +79,19 @@ function removeImages {
         echo 'No matching images to remove'
         return 0
     fi
-    docker rmi -f $(docker images | grep $grepTagNamePattern | awk '{print $3}')
+    docker rmi -f $(docker images | grep $grepImagePattern | awk '{print $3}')
 }
 
 function gatherContainersToRemove {
-    if ! "$grepContainerName"; then
+    if ! "$grepContainer"; then
         echo ''
         return 0
     fi
-    docker ps -a | grep "$grepContainerNamePattern"
+    docker ps -a | grep "$grepContainerPattern"
 }
 
 function removeContainers {
-    if ! "$grepContainerName"; then
+    if ! "$grepContainer"; then
         echo ''
         return 0
     fi
@@ -99,7 +99,7 @@ function removeContainers {
         echo 'No matching containers to remove'
         return 0
     fi
-    docker rm -f $(docker ps -a | grep $grepContainerNamePattern | awk '{print $NF}')
+    docker rm -f $(docker ps -a | grep $grepContainerPattern | awk '{print $NF}')
 }
 
 while getopts ":c:drt:h" option; do
@@ -115,12 +115,12 @@ while getopts ":c:drt:h" option; do
             dangling=true
             ;;
         c)
-            grepContainerName=true
-            grepContainerNamePattern="$OPTARG"
+            grepContainer=true
+            grepContainerPattern="$OPTARG"
             ;;
         t)
-            grepTagName=true
-            grepTagNamePattern="$OPTARG"
+            grepImage=true
+            grepImagePattern="$OPTARG"
             ;;
         \?)
             echo "invalid option: -$OPTARG" >&2
@@ -137,7 +137,7 @@ while getopts ":c:drt:h" option; do
     esac
 done
 
-if ! { "$dangling" || "$grepContainerName" || "$grepTagName"; } then
+if ! { "$dangling" || "$grepContainer" || "$grepImage"; } then
     echo 'Nothing will be removed: no removal strategy specified'
     echo ''
     displayHelpPrompt
