@@ -10,4 +10,4 @@ Commands
 --------
 
 - `clean`: Easily cleanup Docker images and containers
-- `machine`: Switch active Docker machine
+- `switch`: Switch active Docker machine
