@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 summary='Remove images or containers'
-usage="Usage: dockerutil clean [OPTIONS]"
+usage="Usage: dockerclean [OPTIONS]"
 
 # global variables
 dryRun=true
