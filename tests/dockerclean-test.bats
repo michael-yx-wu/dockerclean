@@ -54,6 +54,7 @@ setup() {
     export alpine_26_container_id=$(docker inspect --format={{.Id}} alpine.26.dockerclean)
     export alpine_latest_container_id=$(docker inspect --format={{.Id}} alpine.32.dockerclean)
     export cirros_latest_container_id=$(docker inspect --format={{.Id}} cirros.030.dockerclean)
+    export cirros_exited_container_id=$(docker inspect --format={{.Id}} cirros.exited.dockerclean)
 }
 
 @test "matches containers without removing" {
@@ -65,6 +66,16 @@ setup() {
     alpine_latest_matched_container_id=$(docker inspect --format={{.Id}} $(echo "$results" | grep alpine | grep "3\.2" | awk '{print $1}'))
     [ "$alpine_26_matched_container_id" = "$alpine_26_container_id" ]
     [ "$alpine_latest_matched_container_id" = "$alpine_latest_container_id" ]
+
+    nothingRemoved
+}
+
+@test "matches exited containers without removing" {
+    results=$(./dockerclean -e)
+    num_results=$(echo "$results" | grep cirros | grep Exited | wc -l)
+    [ "$num_results" -eq 1 ]
+    cirros_exited_matched_container_id=$(docker inspect --format={{.Id}} $(echo "$results" | grep cirros | grep Exited | awk '{print $1}'))
+    [ "$alpine_exited_matched_container_id" = "$alpine_exited_container_id" ]
 
     nothingRemoved
 }

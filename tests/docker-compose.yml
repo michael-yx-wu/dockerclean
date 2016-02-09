@@ -12,3 +12,8 @@ cirros030:
     container_name: cirros.030.dockerclean
     image: cirros:0.3.0
     command: sleep 300
+
+cirrosexited:
+    container_name: cirros.exited.dockerclean
+    image: cirros:0.3.0
+    command: sleep 0

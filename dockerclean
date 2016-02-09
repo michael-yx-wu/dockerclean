@@ -10,6 +10,7 @@ grepContainer=false
 grepContainerPattern=''
 grepImage=false
 grepImagePattern=''
+exitedContainers=false
 
 function displayUsageAndSummary {
     printf "%s\n\n%s\n" "$usage" "$summary"
@@ -19,7 +20,7 @@ function displayHelp {
     displayUsageAndSummary
     echo ''
     declare -A optionsTable
-    local numFlags=5
+    local numFlags=6
     optionsTable["0,0"]='-c PATTERN'
     optionsTable["0,1"]='Remove all containers matched by PATTERN'
     optionsTable["1,0"]='-d'
@@ -28,6 +29,8 @@ function displayHelp {
     optionsTable["2,1"]='If the -r option is not given, display all images or containers that would be removed'
     optionsTable["3,0"]='-i PATTERN'
     optionsTable["3,1"]='Remove all images matched by PATTERN'
+    optionsTable["5,0"]='-e'
+    optionsTable["5,1"]='Remove all exited containers'
     optionsTable["4,0"]='-h'
     optionsTable["4,1"]='Print usage and options'
     i=0
@@ -83,15 +86,19 @@ function removeImages {
 }
 
 function gatherContainersToRemove {
-    if ! "$grepContainer"; then
+    if "$grepContainer" && "$exitedContainers"; then
+        docker ps -a | grep -E "$grepContainerPattern|Exited"
+    elif "$grepContainer"; then
+        docker ps -a | grep -E "$grepContainerPattern"
+    elif "$exitedContainers"; then
+        docker ps -a | grep -E "Exited"
+    else
         echo ''
-        return 0
     fi
-    docker ps -a | grep "$grepContainerPattern"
 }
 
 function removeContainers {
-    if ! "$grepContainer"; then
+    if ! "$grepContainer" && ! "$exitedContainers"; then
         echo ''
         return 0
     fi
@@ -99,10 +106,10 @@ function removeContainers {
         echo 'No matching containers to remove'
         return 0
     fi
-    docker rm -f $(docker ps -a | grep $grepContainerPattern | awk '{print $NF}')
+    docker rm -f $(echo "$1" | awk '{print $1}')
 }
 
-while getopts ":c:dri:h" option; do
+while getopts ":c:deri:h" option; do
     case "$option" in
         h)
             displayHelp
@@ -117,6 +124,9 @@ while getopts ":c:dri:h" option; do
         c)
             grepContainer=true
             grepContainerPattern="$OPTARG"
+            ;;
+        e)
+            exitedContainers=true
             ;;
         i)
             grepImage=true
@@ -137,7 +147,7 @@ while getopts ":c:dri:h" option; do
     esac
 done
 
-if ! { "$dangling" || "$grepContainer" || "$grepImage"; } then
+if ! { "$dangling" || "$grepContainer" || "$grepImage" || "$exitedContainers"; } then
     echo 'Nothing will be removed: no removal strategy specified'
     echo ''
     displayHelpPrompt
