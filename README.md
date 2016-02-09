@@ -1,9 +1,7 @@
-dockerclean
-===========
+# dockerclean
 A simple utility to make it easier to cleanup Docker images and containers.
 
-Usage
------
+## Usage
 `dockerclean [OPTIONS]`
 
 - `-c PATTERN`: Remove all containers matched by `PATTERN`
@@ -11,5 +9,10 @@ Usage
 - `-r`: By default `dockerclean` executes in `dry-run` mode to give you a chance
   to preview any images or containers that will get deleted. Use the `-r` flag
   to remove matched images and containers.
-- `-t PATTERN`: Remove all images matched by `PATTERN`
+- `-i PATTERN`: Remove all images matched by `PATTERN`
 - `-h`: Print usage and options
+
+## Build status
+![master](https://circleci.com/gh/michael-yx-wu/dockerclean/tree/master.png?style=shield&circle-token=810386c47ffeb705bf8c4e52a88c0d2177e82230) (master)
+
+![develop](https://circleci.com/gh/michael-yx-wu/dockerclean/tree/develop.png?style=shield&circle-token=810386c47ffeb705bf8c4e52a88c0d2177e82230) (develop)

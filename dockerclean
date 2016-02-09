@@ -26,7 +26,7 @@ function displayHelp {
     optionsTable["1,1"]='Remove all images tagged as <none>'
     optionsTable["2,0"]='-r'
     optionsTable["2,1"]='If the -r option is not given, display all images or containers that would be removed'
-    optionsTable["3,0"]='-t PATTERN'
+    optionsTable["3,0"]='-i PATTERN'
     optionsTable["3,1"]='Remove all images matched by PATTERN'
     optionsTable["4,0"]='-h'
     optionsTable["4,1"]='Print usage and options'
@@ -102,7 +102,7 @@ function removeContainers {
     docker rm -f $(docker ps -a | grep $grepContainerPattern | awk '{print $NF}')
 }
 
-while getopts ":c:drt:h" option; do
+while getopts ":c:dri:h" option; do
     case "$option" in
         h)
             displayHelp
@@ -118,7 +118,7 @@ while getopts ":c:drt:h" option; do
             grepContainer=true
             grepContainerPattern="$OPTARG"
             ;;
-        t)
+        i)
             grepImage=true
             grepImagePattern="$OPTARG"
             ;;

@@ -1,0 +1,14 @@
+alpine26:
+    container_name: alpine.26.dockerclean
+    image: alpine:2.6
+    command: sleep 300
+
+alpine32:
+    container_name: alpine.32.dockerclean
+    image: alpine:3.2
+    command: sleep 300
+
+cirros030:
+    container_name: cirros.030.dockerclean
+    image: cirros:0.3.0
+    command: sleep 300

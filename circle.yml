@@ -1,0 +1,15 @@
+machine:
+    pre:
+        - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.1-circleci'
+        - sudo chmod 0755 /usr/bin/docker
+    services:
+        - docker
+
+dependencies:
+    pre:
+        - git clone https://github.com/sstephenson/bats.git; cd bats; sudo ./install.sh /usr/local
+        - docker -v
+
+test:
+    override:
+        - bats tests
